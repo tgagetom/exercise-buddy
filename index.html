@@ -732,7 +732,7 @@
             if (allUsers[userName]) {
                 currentUser = userName;
                 localStorage.setItem('rememberedUser', userName);
-                alert('Welcome back, ' + userName + '! Your data has been loaded.');
+                // Don't show alert, just proceed
             } else {
                 const newUserData = {
                     goals: [],
@@ -746,8 +746,8 @@
                 saveAllData();
             }
 
-            updateDisplay();
             userNameInput.value = '';
+            updateDisplay();
         }
 
         // Select existing user
