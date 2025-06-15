@@ -140,11 +140,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
 
         .user-option:hover {
             border-color: #4facfe;
             background: #f8fffe;
+        }
+
+        .user-option-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
         }
 
         .user-option-info {
@@ -169,6 +177,23 @@
             font-size: 11px;
             color: #d63384;
             font-weight: bold;
+        }
+
+        .delete-user-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-left: 8px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .delete-user-btn:hover {
+            opacity: 1;
         }
 
         .current-user {
@@ -841,6 +866,31 @@
             }
         }
 
+        // Delete user
+        function deleteUser(userName, event) {
+            // Prevent the user selection when clicking delete
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            if (confirm('Are you sure you want to delete ' + userName + '\'s profile? This will delete all their goals, streaks, and progress data. This cannot be undone.')) {
+                // Remove user from data
+                delete allUsers[userName];
+                
+                // If this was the current user, reset current user
+                if (currentUser === userName) {
+                    currentUser = '';
+                    localStorage.removeItem('rememberedUser');
+                }
+                
+                // Save updated data
+                saveAllData();
+                
+                // Update display
+                updateDisplay();
+            }
+        }
+
         // Start daily check-in
         function startCheckin() {
             const activeGoals = getActiveGoals();
@@ -1140,11 +1190,16 @@
                     const maxStreak = goals.length > 0 ? Math.max.apply(Math, goals.map(g => g.streak)) : 0;
                     
                     html += '<div class="user-option" onclick="selectUser(\'' + userName + '\')">';
+                    html += '<div class="user-option-content">';
                     html += '<div class="user-option-info">';
                     html += '<div class="user-option-name">' + userName + '</div>';
                     html += '<div class="user-option-preview">' + preview + '</div>';
                     html += '</div>';
+                    html += '<div style="display: flex; align-items: center;">';
                     html += '<div class="user-option-streak">' + maxStreak + ' 🔥</div>';
+                    html += '<button class="delete-user-btn" onclick="deleteUser(\'' + userName + '\', event)" title="Delete ' + userName + '\'s profile">×</button>';
+                    html += '</div>';
+                    html += '</div>';
                     html += '</div>';
                 });
                 
