@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Accountability App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji {
+            font-size: 20px;
+        }
+
+        .goal-setup {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .goal-setup input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .goal-setup input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .goal-setup button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .goal-setup button:hover {
+            transform: translateY(-2px);
+        }
+
+        .current-goal {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .current-goal h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .current-goal p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .streak-display {
+            text-align: center;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .streak-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #d63384;
+            margin-bottom: 5px;
+        }
+
+        .streak-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .checkin-section {
+            text-align: center;
+        }
+
+        .checkin-status {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .checkin-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .checkin-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .checkin-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkin-btn.success {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+            color: white;
+        }
+
+        .checkin-btn.danger {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .checkin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .checkin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Accountability Tracker</h1>
+            <div class="subtitle">Stay consistent, achieve together</div>
+        </div>
+
+        <div class="content">
+            <!-- Goal Setup Section -->
+            <div class="section" id="goalSetup">
+                <h2><span class="emoji">⚡</span>Set Your Goal</h2>
+                <div class="goal-setup">
+                    <input type="text" id="goalInput" placeholder="What's your daily goal? (e.g., Walk 30 minutes)">
+                    <button onclick="setGoal()">Set Goal</button>
+                </div>
+            </div>
+
+            <!-- Current Goal Display -->
+            <div class="section" id="currentGoalSection" style="display: none;">
+                <h2><span class="emoji">🎯</span>Current Goal</h2>
+                <div class="current-goal">
+                    <h3 id="currentGoalText"></h3>
+                    <p>Started: <span id="goalStartDate"></span></p>
+                </div>
+            </div>
+
+            <!-- Streak Display -->
+            <div class="section" id="streakSection" style="display: none;">
+                <h2><span class="emoji">🔥</span>Current Streak</h2>
+                <div class="streak-display">
+                    <div class="streak-number" id="streakNumber">0</div>
+                    <div class="streak-label">Days in a row</div>
+                </div>
+            </div>
+
+            <!-- Check-in Section -->
+            <div class="section" id="checkinSection" style="display: none;">
+                <h2><span class="emoji">✅</span>Daily Check-in</h2>
+                <div class="checkin-status" id="checkinStatus">
+                    Ready for today's check-in!
+                </div>
+                <button class="checkin-btn success" id="checkinBtn" onclick="checkIn()">
+                    I completed my goal today! 🎉
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="section" id="statsSection" style="display: none;">
+                <h2><span class="emoji">📊</span>Your Progress</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalDays">0</div>
+                        <div class="stat-label">Total Days</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="successRate">0%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+                <button class="reset-btn" onclick="resetProgress()">Reset All Progress</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App state
+        let userData = {
+            goal: '',
+            goalStartDate: '',
+            currentStreak: 0,
+            totalDays: 0,
+            completedDays: 0,
+            lastCheckinDate: '',
+            checkinHistory: []
+        };
+
+        // Initialize app
+        function init() {
+            loadUserData();
+            updateDisplay();
+        }
+
+        // Load data from memory
+        function loadUserData() {
+            const saved = JSON.parse(localStorage.getItem('accountabilityData') || '{}');
+            userData = { ...userData, ...saved };
+        }
+
+        // Save data to memory
+        function saveUserData() {
+            localStorage.setItem('accountabilityData', JSON.stringify(userData));
+        }
+
+        // Set user goal
+        function setGoal() {
+            const goalInput = document.getElementById('goalInput');
+            const goal = goalInput.value.trim();
+            
+            if (!goal) {
+                alert('Please enter a goal!');
+                return;
+            }
+
+            userData.goal = goal;
+            userData.goalStartDate = new Date().toLocaleDateString();
+            userData.currentStreak = 0;
+            userData.totalDays = 0;
+            userData.completedDays = 0;
+            userData.lastCheckinDate = '';
+            userData.checkinHistory = [];
+
+            saveUserData();
+            updateDisplay();
+            goalInput.value = '';
+        }
+
+        // Daily check-in
+        function checkIn() {
+            const today = new Date().toDateString();
+            
+            if (userData.lastCheckinDate === today) {
+                alert('You\'ve already checked in today!');
+                return;
+            }
+
+            // Check if we missed a day
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toDateString();
+
+            if (userData.lastCheckinDate && userData.lastCheckinDate !== yesterdayStr) {
+                // Missed a day, reset streak
+                userData.currentStreak = 1;
+            } else {
+                // Continuing streak
+                userData.currentStreak++;
+            }
+
+            userData.lastCheckinDate = today;
+            userData.totalDays++;
+            userData.completedDays++;
+            userData.checkinHistory.push({
+                date: today,
+                completed: true
+            });
+
+            saveUserData();
+            updateDisplay();
+        }
+
+        // Update the display
+        function updateDisplay() {
+            const hasGoal = userData.goal !== '';
+            
+            // Show/hide sections
+            document.getElementById('goalSetup').style.display = hasGoal ? 'none' : 'block';
+            document.getElementById('currentGoalSection').style.display = hasGoal ? 'block' : 'none';
+            document.getElementById('streakSection').style.display = hasGoal ? 'block' : 'none';
+            document.getElementById('checkinSection').style.display = hasGoal ? 'block' : 'none';
+            document.getElementById('statsSection').style.display = hasGoal ? 'block' : 'none';
+
+            if (hasGoal) {
+                // Update goal display
+                document.getElementById('currentGoalText').textContent = userData.goal;
+                document.getElementById('goalStartDate').textContent = userData.goalStartDate;
+
+                // Update streak
+                document.getElementById('streakNumber').textContent = userData.currentStreak;
+
+                // Update check-in status
+                const today = new Date().toDateString();
+                const checkinBtn = document.getElementById('checkinBtn');
+                const checkinStatus = document.getElementById('checkinStatus');
+
+                if (userData.lastCheckinDate === today) {
+                    checkinStatus.textContent = '✅ Great job! You checked in today!';
+                    checkinStatus.className = 'checkin-status completed';
+                    checkinBtn.textContent = 'Already checked in today!';
+                    checkinBtn.disabled = true;
+                    checkinBtn.className = 'checkin-btn success';
+                } else {
+                    checkinStatus.textContent = 'Ready for today\'s check-in!';
+                    checkinStatus.className = 'checkin-status pending';
+                    checkinBtn.textContent = 'I completed my goal today! 🎉';
+                    checkinBtn.disabled = false;
+                    checkinBtn.className = 'checkin-btn success';
+                }
+
+                // Update stats
+                document.getElementById('totalDays').textContent = userData.totalDays;
+                const successRate = userData.totalDays > 0 ? Math.round((userData.completedDays / userData.totalDays) * 100) : 0;
+                document.getElementById('successRate').textContent = successRate + '%';
+            }
+        }
+
+        // Reset all progress
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                userData = {
+                    goal: '',
+                    goalStartDate: '',
+                    currentStreak: 0,
+                    totalDays: 0,
+                    completedDays: 0,
+                    lastCheckinDate: '',
+                    checkinHistory: []
+                };
+                saveUserData();
+                updateDisplay();
+            }
+        }
+
+        // Initialize when page loads
+        window.onload = init;
+    </script>
+</body>
+</html>
