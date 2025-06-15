@@ -587,6 +587,35 @@
         .reset-btn:hover {
             background: #c82333;
         }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.8);
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #333;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: white;
+            border-color: #4facfe;
+        }
+
+        .nav-btn.active {
+            background: #4facfe;
+            color: white;
+            border-color: #4facfe;
+        }
     </style>
 </head>
 <body>
@@ -619,6 +648,15 @@
                 <div class="current-user">
                     <h3 id="currentUserName"></h3>
                     <button class="switch-user-btn" onclick="switchUser()">Switch User</button>
+                </div>
+                
+                <!-- Navigation Buttons -->
+                <div class="nav-buttons" id="navButtons">
+                    <button class="nav-btn" onclick="showCheckinView()">📋 Check-in</button>
+                    <button class="nav-btn" onclick="showGoalManagement()">🎯 Manage Goals</button>
+                    <button class="nav-btn" onclick="showAddGoal()">➕ Add Goal</button>
+                    <button class="nav-btn" onclick="showStatsView()">📊 Stats</button>
+                    <button class="nav-btn" onclick="showFamilyView()">👨‍👩‍👧‍👦 Family</button>
                 </div>
             </div>
 
@@ -757,7 +795,6 @@
             if (allUsers[userName]) {
                 currentUser = userName;
                 localStorage.setItem('rememberedUser', userName);
-                // Don't show alert, just proceed
             } else {
                 const newUserData = {
                     goals: [],
@@ -788,11 +825,73 @@
             updateDisplay();
         }
 
+        // Show goal management
+        function showGoalManagement() {
+            updateGoalManagement();
+            document.getElementById('goalManagementSection').style.display = 'block';
+            document.getElementById('checkinSection').style.display = 'none';
+            document.getElementById('addGoalSection').style.display = 'none';
+            document.getElementById('statsSection').style.display = 'none';
+            document.getElementById('familyProgressSection').style.display = 'none';
+            updateNavButtons('goals');
+        }
+
         // Show add goal section
         function showAddGoal() {
             document.getElementById('addGoalSection').style.display = 'block';
             document.getElementById('goalManagementSection').style.display = 'none';
             document.getElementById('checkinSection').style.display = 'none';
+            document.getElementById('statsSection').style.display = 'none';
+            document.getElementById('familyProgressSection').style.display = 'none';
+            updateNavButtons('add');
+        }
+
+        // Show check-in view
+        function showCheckinView() {
+            document.getElementById('checkinSection').style.display = 'block';
+            document.getElementById('goalManagementSection').style.display = 'none';
+            document.getElementById('addGoalSection').style.display = 'none';
+            document.getElementById('statsSection').style.display = 'none';
+            document.getElementById('familyProgressSection').style.display = 'none';
+            updateNavButtons('checkin');
+        }
+
+        // Show stats view
+        function showStatsView() {
+            document.getElementById('statsSection').style.display = 'block';
+            document.getElementById('checkinSection').style.display = 'none';
+            document.getElementById('goalManagementSection').style.display = 'none';
+            document.getElementById('addGoalSection').style.display = 'none';
+            document.getElementById('familyProgressSection').style.display = 'none';
+            updateNavButtons('stats');
+        }
+
+        // Show family view
+        function showFamilyView() {
+            document.getElementById('familyProgressSection').style.display = 'block';
+            document.getElementById('checkinSection').style.display = 'none';
+            document.getElementById('goalManagementSection').style.display = 'none';
+            document.getElementById('addGoalSection').style.display = 'none';
+            document.getElementById('statsSection').style.display = 'none';
+            updateNavButtons('family');
+        }
+
+        // Update navigation button states
+        function updateNavButtons(activeView) {
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (activeView === 'checkin') {
+                buttons[0].classList.add('active');
+            } else if (activeView === 'goals') {
+                buttons[1].classList.add('active');
+            } else if (activeView === 'add') {
+                buttons[2].classList.add('active');
+            } else if (activeView === 'stats') {
+                buttons[3].classList.add('active');
+            } else if (activeView === 'family') {
+                buttons[4].classList.add('active');
+            }
         }
 
         // Hide add goal section
@@ -836,13 +935,6 @@
             hideAddGoal();
         }
 
-        // Show goal management
-        function showGoalManagement() {
-            updateGoalManagement();
-            document.getElementById('goalManagementSection').style.display = 'block';
-            document.getElementById('checkinSection').style.display = 'none';
-        }
-
         // Toggle goal tracking
         function toggleGoalTracking(goalId) {
             if (!currentUser || !allUsers[currentUser]) return;
@@ -868,404 +960,17 @@
 
         // Delete user
         function deleteUser(userName, event) {
-            // Prevent the user selection when clicking delete
             if (event) {
                 event.stopPropagation();
             }
             
             if (confirm('Are you sure you want to delete ' + userName + '\'s profile? This will delete all their goals, streaks, and progress data. This cannot be undone.')) {
-                // Remove user from data
                 delete allUsers[userName];
                 
-                // If this was the current user, reset current user
                 if (currentUser === userName) {
                     currentUser = '';
                     localStorage.removeItem('rememberedUser');
                 }
                 
-                // Save updated data
-                saveAllData();
-                
-                // Update display
-                updateDisplay();
-            }
-        }
-
-        // Start daily check-in
-        function startCheckin() {
-            const activeGoals = getActiveGoals();
-            if (activeGoals.length === 0) {
-                return;
-            }
-
-            currentGoalIndex = 0;
-            todaysAnswers = {};
-            updateCheckinCards();
-            
-            document.getElementById('checkinCards').style.display = 'block';
-            document.getElementById('checkinComplete').style.display = 'none';
-            document.getElementById('noGoalsMessage').style.display = 'none';
-            
-            // Hide start button
-            const startButton = document.getElementById('startCheckinBtn');
-            if (startButton) {
-                startButton.style.display = 'none';
-            }
-        }
-
-        // Get active goals for today
-        function getActiveGoals() {
-            if (!currentUser || !allUsers[currentUser]) return [];
-            return allUsers[currentUser].goals.filter(goal => goal.isTracking);
-        }
-
-        // Answer goal (yes/no)
-        function answerGoal(completed) {
-            const activeGoals = getActiveGoals();
-            const currentGoal = activeGoals[currentGoalIndex];
-            
-            if (!currentGoal) return;
-
-            todaysAnswers[currentGoal.id] = completed;
-            
-            // Animate card away
-            const card = document.querySelector('.goal-card.active');
-            if (card) {
-                card.classList.remove('active');
-                card.classList.add(completed ? 'swiped-right' : 'swiped-left');
-            }
-
-            // Move to next goal after animation
-            setTimeout(() => {
-                currentGoalIndex++;
-                if (currentGoalIndex >= activeGoals.length) {
-                    completeCheckin();
-                } else {
-                    updateCheckinCards();
-                }
-            }, 300);
-        }
-
-        // Complete daily check-in
-        function completeCheckin() {
-            const today = new Date().toDateString();
-            const activeGoals = getActiveGoals();
-            let completedCount = 0;
-
-            // Update each goal's progress
-            activeGoals.forEach(goal => {
-                const completed = todaysAnswers[goal.id] || false;
-                
-                if (completed) {
-                    completedCount++;
-                    goal.streak++;
-                    goal.completedDays++;
-                } else {
-                    goal.streak = 0;
-                }
-                
-                goal.totalDays++;
-            });
-
-            // Save today's progress
-            if (!allUsers[currentUser].dailyProgress) {
-                allUsers[currentUser].dailyProgress = {};
-            }
-            allUsers[currentUser].dailyProgress[today] = {
-                answers: Object.assign({}, todaysAnswers),
-                completedCount: completedCount,
-                totalGoals: activeGoals.length
-            };
-
-            saveAllData();
-            showCheckinSummary(completedCount, activeGoals.length);
-        }
-
-        // Show check-in summary
-        function showCheckinSummary(completed, total) {
-            const summaryTitle = document.getElementById('summaryTitle');
-            const summaryText = document.getElementById('summaryText');
-            
-            if (completed === total) {
-                summaryTitle.textContent = 'Perfect day! 🎉';
-                summaryText.textContent = 'You completed all ' + total + ' of your goals!';
-            } else if (completed > total / 2) {
-                summaryTitle.textContent = 'Great job! 👏';
-                summaryText.textContent = 'You completed ' + completed + ' out of ' + total + ' goals.';
-            } else {
-                summaryTitle.textContent = 'Tomorrow is a new day! 💪';
-                summaryText.textContent = 'You completed ' + completed + ' out of ' + total + ' goals.';
-            }
-
-            document.getElementById('checkinCards').style.display = 'none';
-            document.getElementById('checkinComplete').style.display = 'block';
-        }
-
-        // Update check-in cards
-        function updateCheckinCards() {
-            const activeGoals = getActiveGoals();
-            const cardsContainer = document.getElementById('cardsContainer');
-            const progressDots = document.getElementById('progressDots');
-            
-            // Update progress dots
-            progressDots.innerHTML = '';
-            activeGoals.forEach((goal, index) => {
-                const dot = document.createElement('div');
-                dot.className = 'progress-dot';
-                if (index < currentGoalIndex) dot.classList.add('completed');
-                if (index === currentGoalIndex) dot.classList.add('current');
-                progressDots.appendChild(dot);
-            });
-
-            // Clear existing cards
-            cardsContainer.innerHTML = '';
-
-            // Create current card
-            if (currentGoalIndex < activeGoals.length) {
-                const goal = activeGoals[currentGoalIndex];
-                const card = document.createElement('div');
-                card.className = 'goal-card active';
-                
-                card.innerHTML = '<div class="goal-card-emoji">🎯</div>' +
-                    '<div class="goal-card-title">' + goal.text + '</div>' +
-                    '<div class="goal-card-streak">Current streak: ' + goal.streak + ' days</div>' +
-                    '<div class="goal-card-buttons">' +
-                    '<button class="goal-card-btn no" onclick="answerGoal(false)">❌ No</button>' +
-                    '<button class="goal-card-btn yes" onclick="answerGoal(true)">✅ Yes</button>' +
-                    '</div>';
-                
-                cardsContainer.appendChild(card);
-            }
-        }
-
-        // Check if user has completed today's check-in
-        function hasCompletedToday() {
-            if (!currentUser || !allUsers[currentUser]) return false;
-            const today = new Date().toDateString();
-            return allUsers[currentUser].dailyProgress && allUsers[currentUser].dailyProgress[today];
-        }
-
-        // Update the display
-        function updateDisplay() {
-            const hasUser = currentUser !== '';
-            const hasGoals = hasUser && allUsers[currentUser] && allUsers[currentUser].goals && allUsers[currentUser].goals.length > 0;
-            const hasActiveGoals = hasUser && getActiveGoals().length > 0;
-            const completedToday = hasCompletedToday();
-            
-            // Show/hide sections based on state
-            document.getElementById('userSetup').style.display = !hasUser ? 'block' : 'none';
-            document.getElementById('currentUserSection').style.display = hasUser ? 'block' : 'none';
-            document.getElementById('checkinSection').style.display = hasUser ? 'block' : 'none';
-            document.getElementById('goalManagementSection').style.display = 'none';
-            document.getElementById('addGoalSection').style.display = 'none';
-            document.getElementById('statsSection').style.display = hasGoals ? 'block' : 'none';
-            
-            // Show family progress if there are users with goals
-            const usersWithGoals = Object.keys(allUsers).filter(user => 
-                allUsers[user].goals && allUsers[user].goals.length > 0
-            );
-            document.getElementById('familyProgressSection').style.display = usersWithGoals.length > 0 ? 'block' : 'none';
-
-            // Update user setup section with existing users
-            if (!hasUser) {
-                updateUserSetupSection();
-            }
-
-            if (hasUser) {
-                // Update current user display
-                document.getElementById('currentUserName').textContent = 'Hello, ' + currentUser + '! 👋';
-
-                // Update check-in section
-                updateCheckinSection(hasActiveGoals, completedToday);
-
-                if (hasGoals) {
-                    updateStatsSection();
-                }
-            }
-
-            // Update family progress
-            updateFamilyProgress();
-        }
-
-        // Update check-in section
-        function updateCheckinSection(hasActiveGoals, completedToday) {
-            const checkinCards = document.getElementById('checkinCards');
-            const checkinComplete = document.getElementById('checkinComplete');
-            const noGoalsMessage = document.getElementById('noGoalsMessage');
-
-            if (!hasActiveGoals) {
-                // No active goals
-                checkinCards.style.display = 'none';
-                checkinComplete.style.display = 'none';
-                noGoalsMessage.style.display = 'block';
-            } else if (completedToday) {
-                // Already completed today
-                const today = new Date().toDateString();
-                const todayData = allUsers[currentUser].dailyProgress[today];
-                showCheckinSummary(todayData.completedCount, todayData.totalGoals);
-                checkinCards.style.display = 'none';
-                noGoalsMessage.style.display = 'none';
-            } else {
-                // Ready for check-in
-                checkinCards.style.display = 'none';
-                checkinComplete.style.display = 'none';
-                noGoalsMessage.style.display = 'none';
-                
-                // Show start check-in button
-                const checkinSection = document.getElementById('checkinSection');
-                let startButton = document.getElementById('startCheckinBtn');
-                if (!startButton) {
-                    startButton = document.createElement('button');
-                    startButton.id = 'startCheckinBtn';
-                    startButton.className = 'add-goal-btn';
-                    startButton.style.width = '100%';
-                    startButton.style.marginBottom = '20px';
-                    startButton.onclick = startCheckin;
-                    checkinSection.insertBefore(startButton, checkinSection.children[1]);
-                }
-                startButton.textContent = 'Start Today\'s Check-in (' + getActiveGoals().length + ' goals)';
-                startButton.style.display = 'block';
-            }
-        }
-
-        // Update goal management section
-        function updateGoalManagement() {
-            const goalList = document.getElementById('goalList');
-            const userGoals = allUsers[currentUser].goals || [];
-            
-            if (userGoals.length === 0) {
-                goalList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No goals yet. Add your first goal!</p>';
-                return;
-            }
-
-            let html = '';
-            userGoals.forEach(goal => {
-                html += '<div class="goal-item">';
-                html += '<div class="goal-info">';
-                html += '<div class="goal-name">' + goal.text + '</div>';
-                html += '<div class="goal-details">';
-                html += 'Streak: ' + goal.streak + ' days | ';
-                html += (goal.showToFamily ? 'Visible to family' : 'Private') + ' | ';
-                html += (goal.isTracking ? 'Active' : 'Paused');
-                html += '</div>';
-                html += '</div>';
-                html += '<div class="goal-controls">';
-                html += '<div class="goal-toggle ' + (goal.isTracking ? 'active' : '') + '" onclick="toggleGoalTracking(\'' + goal.id + '\')"></div>';
-                html += '<button onclick="deleteGoal(\'' + goal.id + '\')" style="background: #dc3545; color: white; border: none; padding: 5px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">Delete</button>';
-                html += '</div>';
-                html += '</div>';
-            });
-            
-            goalList.innerHTML = html;
-        }
-
-        // Update stats section
-        function updateStatsSection() {
-            const userGoals = allUsers[currentUser].goals || [];
-            const totalGoals = userGoals.length;
-            const activeGoals = userGoals.filter(g => g.isTracking).length;
-
-            document.getElementById('totalDays').textContent = totalGoals;
-            document.getElementById('totalDays').nextElementSibling.textContent = 'Total Goals';
-            
-            document.getElementById('successRate').textContent = activeGoals;
-            document.getElementById('successRate').nextElementSibling.textContent = 'Active Goals';
-        }
-
-        // Update user setup section
-        function updateUserSetupSection() {
-            const existingUsersDiv = document.getElementById('existingUsers');
-            const userListDiv = document.getElementById('userList');
-            const userNames = Object.keys(allUsers);
-            
-            if (userNames.length > 0) {
-                existingUsersDiv.style.display = 'block';
-                
-                let html = '';
-                userNames.forEach(userName => {
-                    const userData = allUsers[userName];
-                    const goals = userData.goals || [];
-                    const activeGoals = goals.filter(g => g.isTracking);
-                    const preview = activeGoals.length > 0 ? activeGoals.length + ' active goals' : 'No active goals';
-                    const maxStreak = goals.length > 0 ? Math.max.apply(Math, goals.map(g => g.streak)) : 0;
-                    
-                    html += '<div class="user-option" onclick="selectUser(\'' + userName + '\')">';
-                    html += '<div class="user-option-content">';
-                    html += '<div class="user-option-info">';
-                    html += '<div class="user-option-name">' + userName + '</div>';
-                    html += '<div class="user-option-preview">' + preview + '</div>';
-                    html += '</div>';
-                    html += '<div style="display: flex; align-items: center;">';
-                    html += '<div class="user-option-streak">' + maxStreak + ' 🔥</div>';
-                    html += '<button class="delete-user-btn" onclick="deleteUser(\'' + userName + '\', event)" title="Delete ' + userName + '\'s profile">×</button>';
-                    html += '</div>';
-                    html += '</div>';
-                    html += '</div>';
-                });
-                
-                userListDiv.innerHTML = html;
-            } else {
-                existingUsersDiv.style.display = 'none';
-            }
-        }
-
-        // Update family progress section
-        function updateFamilyProgress() {
-            const familyProgressDiv = document.getElementById('familyProgress');
-            const usersWithGoals = Object.keys(allUsers).filter(user => 
-                allUsers[user].goals && allUsers[user].goals.length > 0
-            );
-            
-            if (usersWithGoals.length === 0) {
-                familyProgressDiv.innerHTML = '<p style="text-align: center; color: #666;">No family members have set goals yet.</p>';
-                return;
-            }
-
-            let html = '';
-            const today = new Date().toDateString();
-
-            usersWithGoals.forEach(userName => {
-                const userData = allUsers[userName];
-                const goals = userData.goals || [];
-                const publicGoals = goals.filter(g => g.showToFamily && g.isTracking);
-                const todayProgress = userData.dailyProgress && userData.dailyProgress[today];
-                const checkedInToday = !!todayProgress;
-                const maxStreak = goals.length > 0 ? Math.max.apply(Math, goals.map(g => g.streak)) : 0;
-                
-                html += '<div class="user-card">';
-                html += '<div class="user-header">';
-                html += '<span class="user-name">' + userName + '</span>';
-                html += '<span class="user-streak">' + maxStreak + ' 🔥</span>';
-                html += '</div>';
-                html += '<div class="user-goal">' + publicGoals.length + ' active goals</div>';
-                html += '<span class="user-status ' + (checkedInToday ? 'checked-in' : 'pending') + '">';
-                html += checkedInToday ? '✅ Checked in today' : '⏳ Pending check-in';
-                html += '</span>';
-                html += '</div>';
-            });
-
-            familyProgressDiv.innerHTML = html;
-        }
-
-        // Reset current user's progress
-        function resetProgress() {
-            if (!currentUser || !allUsers[currentUser]) {
-                return;
-            }
-
-            if (confirm('Are you sure you want to reset ALL your progress? This will delete all goals and streaks and cannot be undone.')) {
-                allUsers[currentUser] = {
-                    goals: [],
-                    dailyProgress: {},
-                    createdDate: allUsers[currentUser].createdDate || new Date().toISOString()
-                };
                 saveAllData();
                 updateDisplay();
-            }
-        }
-
-        // Initialize when page loads
-        window.onload = init;
-    </script>
-</body>
-</html>
