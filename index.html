@@ -65,6 +65,70 @@
             font-size: 20px;
         }
 
+        .user-setup {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .user-setup input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .user-setup input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .user-setup button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .user-setup button:hover {
+            transform: translateY(-2px);
+        }
+
+        .current-user {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .current-user h3 {
+            color: #333;
+            margin: 0;
+        }
+
+        .switch-user-btn {
+            background: rgba(255,255,255,0.8);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #333;
+        }
+
         .goal-setup {
             background: #f8f9fa;
             padding: 20px;
@@ -222,6 +286,69 @@
             margin-top: 5px;
         }
 
+        .family-progress {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .user-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .user-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .user-streak {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #d63384;
+            font-weight: bold;
+        }
+
+        .user-goal {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .user-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .user-status.checked-in {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .user-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
         .reset-btn {
             width: 100%;
             padding: 10px;
@@ -242,13 +369,30 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 Accountability Tracker</h1>
+            <h1>🎯 Family Accountability</h1>
             <div class="subtitle">Stay consistent, achieve together</div>
         </div>
 
         <div class="content">
+            <!-- User Setup Section -->
+            <div class="section" id="userSetup">
+                <h2><span class="emoji">👤</span>Who Are You?</h2>
+                <div class="user-setup">
+                    <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Dad, Sarah, etc.)">
+                    <button onclick="setUser()">Continue</button>
+                </div>
+            </div>
+
+            <!-- Current User Display -->
+            <div class="section" id="currentUserSection" style="display: none;">
+                <div class="current-user">
+                    <h3 id="currentUserName"></h3>
+                    <button class="switch-user-btn" onclick="switchUser()">Switch User</button>
+                </div>
+            </div>
+
             <!-- Goal Setup Section -->
-            <div class="section" id="goalSetup">
+            <div class="section" id="goalSetup" style="display: none;">
                 <h2><span class="emoji">⚡</span>Set Your Goal</h2>
                 <div class="goal-setup">
                     <input type="text" id="goalInput" placeholder="What's your daily goal? (e.g., Walk 30 minutes)">
@@ -258,7 +402,7 @@
 
             <!-- Current Goal Display -->
             <div class="section" id="currentGoalSection" style="display: none;">
-                <h2><span class="emoji">🎯</span>Current Goal</h2>
+                <h2><span class="emoji">🎯</span>Your Goal</h2>
                 <div class="current-goal">
                     <h3 id="currentGoalText"></h3>
                     <p>Started: <span id="goalStartDate"></span></p>
@@ -267,7 +411,7 @@
 
             <!-- Streak Display -->
             <div class="section" id="streakSection" style="display: none;">
-                <h2><span class="emoji">🔥</span>Current Streak</h2>
+                <h2><span class="emoji">🔥</span>Your Streak</h2>
                 <div class="streak-display">
                     <div class="streak-number" id="streakNumber">0</div>
                     <div class="streak-label">Days in a row</div>
@@ -285,6 +429,14 @@
                 </button>
             </div>
 
+            <!-- Family Progress -->
+            <div class="section" id="familyProgressSection" style="display: none;">
+                <h2><span class="emoji">👨‍👩‍👧‍👦</span>Family Progress</h2>
+                <div class="family-progress" id="familyProgress">
+                    <!-- User cards will be populated here -->
+                </div>
+            </div>
+
             <!-- Stats -->
             <div class="section" id="statsSection" style="display: none;">
                 <h2><span class="emoji">📊</span>Your Progress</h2>
@@ -298,38 +450,81 @@
                         <div class="stat-label">Success Rate</div>
                     </div>
                 </div>
-                <button class="reset-btn" onclick="resetProgress()">Reset All Progress</button>
+                <button class="reset-btn" onclick="resetProgress()">Reset Your Progress</button>
             </div>
         </div>
     </div>
 
     <script>
         // App state
-        let userData = {
-            goal: '',
-            goalStartDate: '',
-            currentStreak: 0,
-            totalDays: 0,
-            completedDays: 0,
-            lastCheckinDate: '',
-            checkinHistory: []
-        };
+        let currentUser = '';
+        let allUsers = {};
 
         // Initialize app
         function init() {
-            loadUserData();
+            loadAllData();
             updateDisplay();
         }
 
-        // Load data from memory
-        function loadUserData() {
-            const saved = JSON.parse(localStorage.getItem('accountabilityData') || '{}');
-            userData = { ...userData, ...saved };
+        // Load all user data
+        function loadAllData() {
+            try {
+                const savedUsers = JSON.parse(localStorage.getItem('familyAccountabilityUsers') || '{}');
+                allUsers = savedUsers;
+                
+                const savedCurrentUser = localStorage.getItem('currentUser');
+                if (savedCurrentUser && allUsers[savedCurrentUser]) {
+                    currentUser = savedCurrentUser;
+                }
+            } catch (e) {
+                console.log('Storage not available, using session data only');
+            }
         }
 
-        // Save data to memory
-        function saveUserData() {
-            localStorage.setItem('accountabilityData', JSON.stringify(userData));
+        // Save all data
+        function saveAllData() {
+            try {
+                localStorage.setItem('familyAccountabilityUsers', JSON.stringify(allUsers));
+                localStorage.setItem('currentUser', currentUser);
+            } catch (e) {
+                console.log('Storage not available, data will reset on refresh');
+            }
+        }
+
+        // Set current user
+        function setUser() {
+            const userNameInput = document.getElementById('userNameInput');
+            const userName = userNameInput.value.trim();
+            
+            if (!userName) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            currentUser = userName;
+            
+            // Create user if doesn't exist
+            if (!allUsers[userName]) {
+                allUsers[userName] = {
+                    goal: '',
+                    goalStartDate: '',
+                    currentStreak: 0,
+                    totalDays: 0,
+                    completedDays: 0,
+                    lastCheckinDate: '',
+                    checkinHistory: []
+                };
+            }
+
+            saveAllData();
+            updateDisplay();
+            userNameInput.value = '';
+        }
+
+        // Switch user
+        function switchUser() {
+            currentUser = '';
+            updateDisplay();
         }
 
         // Set user goal
@@ -342,22 +537,33 @@
                 return;
             }
 
-            userData.goal = goal;
-            userData.goalStartDate = new Date().toLocaleDateString();
-            userData.currentStreak = 0;
-            userData.totalDays = 0;
-            userData.completedDays = 0;
-            userData.lastCheckinDate = '';
-            userData.checkinHistory = [];
+            if (!currentUser || !allUsers[currentUser]) {
+                alert('Please select a user first!');
+                return;
+            }
 
-            saveUserData();
+            allUsers[currentUser].goal = goal;
+            allUsers[currentUser].goalStartDate = new Date().toLocaleDateString();
+            allUsers[currentUser].currentStreak = 0;
+            allUsers[currentUser].totalDays = 0;
+            allUsers[currentUser].completedDays = 0;
+            allUsers[currentUser].lastCheckinDate = '';
+            allUsers[currentUser].checkinHistory = [];
+
+            saveAllData();
             updateDisplay();
             goalInput.value = '';
         }
 
         // Daily check-in
         function checkIn() {
+            if (!currentUser || !allUsers[currentUser]) {
+                alert('Please select a user first!');
+                return;
+            }
+
             const today = new Date().toDateString();
+            const userData = allUsers[currentUser];
             
             if (userData.lastCheckinDate === today) {
                 alert('You\'ve already checked in today!');
@@ -385,59 +591,114 @@
                 completed: true
             });
 
-            saveUserData();
+            saveAllData();
             updateDisplay();
         }
 
         // Update the display
         function updateDisplay() {
-            const hasGoal = userData.goal !== '';
+            const hasUser = currentUser !== '';
+            const hasGoal = hasUser && allUsers[currentUser] && allUsers[currentUser].goal !== '';
             
-            // Show/hide sections
-            document.getElementById('goalSetup').style.display = hasGoal ? 'none' : 'block';
+            // Show/hide sections based on state
+            document.getElementById('userSetup').style.display = hasUser ? 'none' : 'block';
+            document.getElementById('currentUserSection').style.display = hasUser ? 'block' : 'none';
+            document.getElementById('goalSetup').style.display = hasUser && !hasGoal ? 'block' : 'none';
             document.getElementById('currentGoalSection').style.display = hasGoal ? 'block' : 'none';
             document.getElementById('streakSection').style.display = hasGoal ? 'block' : 'none';
             document.getElementById('checkinSection').style.display = hasGoal ? 'block' : 'none';
             document.getElementById('statsSection').style.display = hasGoal ? 'block' : 'none';
+            
+            // Show family progress if there are multiple users with goals
+            const usersWithGoals = Object.keys(allUsers).filter(user => allUsers[user].goal !== '');
+            document.getElementById('familyProgressSection').style.display = usersWithGoals.length > 0 ? 'block' : 'none';
 
-            if (hasGoal) {
-                // Update goal display
-                document.getElementById('currentGoalText').textContent = userData.goal;
-                document.getElementById('goalStartDate').textContent = userData.goalStartDate;
+            if (hasUser) {
+                // Update current user display
+                document.getElementById('currentUserName').textContent = `Hello, ${currentUser}! 👋`;
 
-                // Update streak
-                document.getElementById('streakNumber').textContent = userData.currentStreak;
+                if (hasGoal) {
+                    const userData = allUsers[currentUser];
+                    
+                    // Update goal display
+                    document.getElementById('currentGoalText').textContent = userData.goal;
+                    document.getElementById('goalStartDate').textContent = userData.goalStartDate;
 
-                // Update check-in status
-                const today = new Date().toDateString();
-                const checkinBtn = document.getElementById('checkinBtn');
-                const checkinStatus = document.getElementById('checkinStatus');
+                    // Update streak
+                    document.getElementById('streakNumber').textContent = userData.currentStreak;
 
-                if (userData.lastCheckinDate === today) {
-                    checkinStatus.textContent = '✅ Great job! You checked in today!';
-                    checkinStatus.className = 'checkin-status completed';
-                    checkinBtn.textContent = 'Already checked in today!';
-                    checkinBtn.disabled = true;
-                    checkinBtn.className = 'checkin-btn success';
-                } else {
-                    checkinStatus.textContent = 'Ready for today\'s check-in!';
-                    checkinStatus.className = 'checkin-status pending';
-                    checkinBtn.textContent = 'I completed my goal today! 🎉';
-                    checkinBtn.disabled = false;
-                    checkinBtn.className = 'checkin-btn success';
+                    // Update check-in status
+                    const today = new Date().toDateString();
+                    const checkinBtn = document.getElementById('checkinBtn');
+                    const checkinStatus = document.getElementById('checkinStatus');
+
+                    if (userData.lastCheckinDate === today) {
+                        checkinStatus.textContent = '✅ Great job! You checked in today!';
+                        checkinStatus.className = 'checkin-status completed';
+                        checkinBtn.textContent = 'Already checked in today!';
+                        checkinBtn.disabled = true;
+                        checkinBtn.className = 'checkin-btn success';
+                    } else {
+                        checkinStatus.textContent = 'Ready for today\'s check-in!';
+                        checkinStatus.className = 'checkin-status pending';
+                        checkinBtn.textContent = 'I completed my goal today! 🎉';
+                        checkinBtn.disabled = false;
+                        checkinBtn.className = 'checkin-btn success';
+                    }
+
+                    // Update stats
+                    document.getElementById('totalDays').textContent = userData.totalDays;
+                    const successRate = userData.totalDays > 0 ? Math.round((userData.completedDays / userData.totalDays) * 100) : 0;
+                    document.getElementById('successRate').textContent = successRate + '%';
                 }
-
-                // Update stats
-                document.getElementById('totalDays').textContent = userData.totalDays;
-                const successRate = userData.totalDays > 0 ? Math.round((userData.completedDays / userData.totalDays) * 100) : 0;
-                document.getElementById('successRate').textContent = successRate + '%';
             }
+
+            // Update family progress
+            updateFamilyProgress();
         }
 
-        // Reset all progress
+        // Update family progress section
+        function updateFamilyProgress() {
+            const familyProgressDiv = document.getElementById('familyProgress');
+            const usersWithGoals = Object.keys(allUsers).filter(user => allUsers[user].goal !== '');
+            
+            if (usersWithGoals.length === 0) {
+                familyProgressDiv.innerHTML = '<p style="text-align: center; color: #666;">No family members have set goals yet.</p>';
+                return;
+            }
+
+            let html = '';
+            const today = new Date().toDateString();
+
+            usersWithGoals.forEach(userName => {
+                const userData = allUsers[userName];
+                const checkedInToday = userData.lastCheckinDate === today;
+                
+                html += `
+                    <div class="user-card">
+                        <div class="user-header">
+                            <span class="user-name">${userName}</span>
+                            <span class="user-streak">${userData.currentStreak} 🔥</span>
+                        </div>
+                        <div class="user-goal">${userData.goal}</div>
+                        <span class="user-status ${checkedInToday ? 'checked-in' : 'pending'}">
+                            ${checkedInToday ? '✅ Checked in today' : '⏳ Pending check-in'}
+                        </span>
+                    </div>
+                `;
+            });
+
+            familyProgressDiv.innerHTML = html;
+        }
+
+        // Reset current user's progress
         function resetProgress() {
-            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
-                userData = {
+            if (!currentUser || !allUsers[currentUser]) {
+                return;
+            }
+
+            if (confirm('Are you sure you want to reset your progress? This cannot be undone.')) {
+                allUsers[currentUser] = {
                     goal: '',
                     goalStartDate: '',
                     currentStreak: 0,
@@ -446,7 +707,7 @@
                     lastCheckinDate: '',
                     checkinHistory: []
                 };
-                saveUserData();
+                saveAllData();
                 updateDisplay();
             }
         }
