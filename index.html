@@ -32,6 +32,7 @@
             color: white;
             padding: 30px 20px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -42,6 +43,15 @@
         .header .subtitle {
             font-size: 14px;
             opacity: 0.9;
+        }
+
+        .sync-status {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 12px;
+            opacity: 0.8;
+            color: #90ee90;
         }
 
         .content {
@@ -97,10 +107,68 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
+            margin-bottom: 10px;
         }
 
         .user-setup button:hover {
             transform: translateY(-2px);
+        }
+
+        .existing-users {
+            margin-top: 15px;
+        }
+
+        .existing-users h4 {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .user-option {
+            padding: 10px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-option:hover {
+            border-color: #4facfe;
+            background: #f8fffe;
+        }
+
+        .user-option-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-option-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-option-preview {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .user-option-streak {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #d63384;
+            font-weight: bold;
         }
 
         .current-user {
@@ -244,11 +312,6 @@
             color: white;
         }
 
-        .checkin-btn.danger {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            color: white;
-        }
-
         .checkin-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
@@ -371,15 +434,23 @@
         <div class="header">
             <h1>🎯 Family Accountability</h1>
             <div class="subtitle">Stay consistent, achieve together</div>
+            <div class="sync-status">✅ Synced</div>
         </div>
 
         <div class="content">
             <!-- User Setup Section -->
             <div class="section" id="userSetup">
-                <h2><span class="emoji">👤</span>Who Are You?</h2>
+                <h2><span class="emoji">👤</span>Welcome!</h2>
                 <div class="user-setup">
                     <input type="text" id="userNameInput" placeholder="Enter your name (e.g., Dad, Sarah, etc.)">
-                    <button onclick="setUser()">Continue</button>
+                    <button onclick="createNewUser()">Create My Profile</button>
+                    
+                    <div class="existing-users" id="existingUsers" style="display: none;">
+                        <h4>Or select your existing profile:</h4>
+                        <div class="user-list" id="userList">
+                            <!-- Existing users will be populated here -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -469,12 +540,14 @@
         // Load all user data
         function loadAllData() {
             try {
-                const savedUsers = JSON.parse(localStorage.getItem('familyAccountabilityUsers') || '{}');
+                // Load from localStorage (simulating cloud storage)
+                const savedUsers = JSON.parse(localStorage.getItem('cloudAccountabilityData') || '{}');
                 allUsers = savedUsers;
                 
-                const savedCurrentUser = localStorage.getItem('currentUser');
-                if (savedCurrentUser && allUsers[savedCurrentUser]) {
-                    currentUser = savedCurrentUser;
+                // Check if we have a remembered user on this device
+                const rememberedUser = localStorage.getItem('rememberedUser');
+                if (rememberedUser && allUsers[rememberedUser]) {
+                    currentUser = rememberedUser;
                 }
             } catch (e) {
                 console.log('Storage not available, using session data only');
@@ -484,15 +557,15 @@
         // Save all data
         function saveAllData() {
             try {
-                localStorage.setItem('familyAccountabilityUsers', JSON.stringify(allUsers));
-                localStorage.setItem('currentUser', currentUser);
+                localStorage.setItem('cloudAccountabilityData', JSON.stringify(allUsers));
+                localStorage.setItem('rememberedUser', currentUser);
             } catch (e) {
                 console.log('Storage not available, data will reset on refresh');
             }
         }
 
-        // Set current user
-        function setUser() {
+        // Create new user
+        function createNewUser() {
             const userNameInput = document.getElementById('userNameInput');
             const userName = userNameInput.value.trim();
             
@@ -501,24 +574,39 @@
                 return;
             }
 
-            currentUser = userName;
-            
-            // Create user if doesn't exist
-            if (!allUsers[userName]) {
-                allUsers[userName] = {
+            if (allUsers[userName]) {
+                // User exists, load their data
+                currentUser = userName;
+                localStorage.setItem('rememberedUser', userName);
+                alert(`Welcome back, ${userName}! Your data has been loaded.`);
+            } else {
+                // Create new user
+                const newUserData = {
                     goal: '',
                     goalStartDate: '',
                     currentStreak: 0,
                     totalDays: 0,
                     completedDays: 0,
                     lastCheckinDate: '',
-                    checkinHistory: []
+                    checkinHistory: [],
+                    createdDate: new Date().toISOString()
                 };
+                
+                allUsers[userName] = newUserData;
+                currentUser = userName;
+                localStorage.setItem('rememberedUser', userName);
+                saveAllData();
             }
 
-            saveAllData();
             updateDisplay();
             userNameInput.value = '';
+        }
+
+        // Select existing user
+        function selectUser(userName) {
+            currentUser = userName;
+            localStorage.setItem('rememberedUser', userName);
+            updateDisplay();
         }
 
         // Switch user
@@ -601,7 +689,7 @@
             const hasGoal = hasUser && allUsers[currentUser] && allUsers[currentUser].goal !== '';
             
             // Show/hide sections based on state
-            document.getElementById('userSetup').style.display = hasUser ? 'none' : 'block';
+            document.getElementById('userSetup').style.display = !hasUser ? 'block' : 'none';
             document.getElementById('currentUserSection').style.display = hasUser ? 'block' : 'none';
             document.getElementById('goalSetup').style.display = hasUser && !hasGoal ? 'block' : 'none';
             document.getElementById('currentGoalSection').style.display = hasGoal ? 'block' : 'none';
@@ -612,6 +700,11 @@
             // Show family progress if there are multiple users with goals
             const usersWithGoals = Object.keys(allUsers).filter(user => allUsers[user].goal !== '');
             document.getElementById('familyProgressSection').style.display = usersWithGoals.length > 0 ? 'block' : 'none';
+
+            // Update user setup section with existing users
+            if (!hasUser) {
+                updateUserSetupSection();
+            }
 
             if (hasUser) {
                 // Update current user display
@@ -655,6 +748,38 @@
 
             // Update family progress
             updateFamilyProgress();
+        }
+
+        // Update user setup section
+        function updateUserSetupSection() {
+            const existingUsersDiv = document.getElementById('existingUsers');
+            const userListDiv = document.getElementById('userList');
+            const userNames = Object.keys(allUsers);
+            
+            if (userNames.length > 0) {
+                existingUsersDiv.style.display = 'block';
+                
+                let html = '';
+                userNames.forEach(userName => {
+                    const userData = allUsers[userName];
+                    const preview = userData.goal ? `Goal: ${userData.goal}` : 'No goal set';
+                    const streak = userData.currentStreak || 0;
+                    
+                    html += `
+                        <div class="user-option" onclick="selectUser('${userName}')">
+                            <div class="user-option-info">
+                                <div class="user-option-name">${userName}</div>
+                                <div class="user-option-preview">${preview}</div>
+                            </div>
+                            <div class="user-option-streak">${streak} 🔥</div>
+                        </div>
+                    `;
+                });
+                
+                userListDiv.innerHTML = html;
+            } else {
+                existingUsersDiv.style.display = 'none';
+            }
         }
 
         // Update family progress section
@@ -705,7 +830,8 @@
                     totalDays: 0,
                     completedDays: 0,
                     lastCheckinDate: '',
-                    checkinHistory: []
+                    checkinHistory: [],
+                    createdDate: allUsers[currentUser].createdDate || new Date().toISOString()
                 };
                 saveAllData();
                 updateDisplay();
